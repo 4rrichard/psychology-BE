@@ -14,13 +14,13 @@ const multer = require("multer");
 
 // const mp = multipart.multipart({});
 const app = express();
-const port = process.env.PORT || 8080;
+const port = process.env.PORT || 10000;
 
 app.use(cookieParser());
 app.use(
   cors({
     credentials: true,
-    origin: ["http://localhost:3000", "https://psychology-website.netlify.app"],
+    origin: "https://psychology-website.netlify.app",
   })
 );
 // app.use(mp.text());
