@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "server.js",
-  "proxy": "https://localhost:3000",
+  "proxy": "https://psychology-website.netlify.app/",
   "engines": {
     "node": "16.x"
   },
