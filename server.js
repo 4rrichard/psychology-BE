@@ -8,12 +8,22 @@ const cors = require("cors");
 
 const bodyParser = require("body-parser");
 const refreshTokenController = require("./controller/refreshTokenController");
+const Post = require("./models/BlogPosts");
 const connectDB = require("./config/dbConn");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 require("dotenv").config();
 const multer = require("multer");
 // const { response } = require("express");
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "../frontend/public/images");
+  },
+  filename: (req, file, cb) => {
+    cb(null, file.originalname);
+  },
+});
+const upload = multer({ storage });
 
 // const mp = multipart.multipart({});
 const app = express();
@@ -154,6 +164,8 @@ app.get("/protected", verify, (req, res) => {
   return res.json({ admin: req.user });
 });
 
+//----MongoDB-----
+
 const regSchema = mongoose.Schema({
   fullDate: {},
   name: String,
@@ -180,10 +192,63 @@ app.post("/api/addregdata", (req, res) => {
 });
 
 app.get("/api/getregdata", (req, res) => {
-  regData.find({}, { fullDate: 1, _id: 0 }, (err, doc) => {
+  regData.find({}, { fullDate: 1, name: 1, _id: 0 }, (err, doc) => {
     if (err) return console.log(err);
     res.json(doc);
   });
+});
+
+app.post("/api/removedata", (req, res) => {
+  const wholeDate = req.body.fullDate;
+  const year = wholeDate.year;
+  const month = wholeDate.month;
+  const day = wholeDate.date;
+  const hour = wholeDate.hour;
+  // console.log(date);
+  console.log(year, month, day, hour);
+  regData.deleteOne(
+    {
+      "fullDate.year": year,
+      "fullDate.month": month,
+      "fullDate.date": day,
+      "fullDate.hour": hour,
+    },
+    (err, doc) => {
+      if (err) return console.log(err);
+      res.json(doc);
+    }
+  );
+});
+
+app.post("/api/addpost", async (req, res) => {
+  const newPost = new Post(req.body);
+  console.log(req.body);
+  newPost.save((err, doc) => {
+    if (err) return console.log(err);
+    res.status(200).json(doc);
+  });
+});
+
+app.get("/api/getpost", (req, res) => {
+  Post.find((err, doc) => {
+    if (err) return console.log(err);
+    res.json(doc);
+  });
+});
+
+//-----Articles-----
+
+app.get("/articles/:pageName", (req, res) => {
+  let pageName = req.params.pageName;
+  console.log(req.params.pageName);
+  res.send(pageName);
+});
+
+app.post("/api/upload", upload.single("file"), (req, res) => {
+  const file = req.file;
+  console.log(req.body);
+  console.log(file.filename);
+  res.status(200).json(file.filename);
 });
 
 mongoose.connection.once("open", () => {
